@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import Image from "next/image"
 import { Heart, BookOpen, Users } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { PageHeader } from "@/components/layout/page-header"
@@ -88,11 +89,14 @@ export default function AboutPage() {
             <Card className="overflow-hidden border-church-gold-light">
               <CardContent className="p-0">
                 <div className="flex flex-col items-center gap-8 p-8 sm:flex-row sm:items-start">
-                  {/* Photo placeholder */}
-                  <div className="flex h-48 w-48 shrink-0 items-center justify-center rounded-xl bg-church-cream-dark">
-                    <span className="text-sm text-church-brown-light">
-                      목사님 사진
-                    </span>
+                  <div className="relative h-48 w-48 shrink-0 overflow-hidden rounded-xl">
+                    <Image
+                      src="/images/pastor.jpg"
+                      alt="이재두 목사"
+                      fill
+                      className="object-cover object-top"
+                      sizes="192px"
+                    />
                   </div>
 
                   {/* Greeting text */}
