@@ -46,7 +46,9 @@ export default function AboutPage() {
             교회 비전
           </h3>
           <p className="mx-auto mt-4 max-w-2xl text-center text-base text-church-brown-light sm:text-lg">
-            겨자씨 한 알의 믿음으로 하나님 나라를 이 땅에 세워가는 교회
+            대한예수교장로회(백석)에 속한 건전한 교단 소속 교회로서,
+            예수 그리스도 안에서 이 땅에 하나님 나라의 확장을 위해 섬기며
+            작은 씨앗들의 모습 속에 풍성한 열매를 소망합니다.
           </p>
 
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -99,9 +101,12 @@ export default function AboutPage() {
                       구미겨자씨교회를 방문해 주셔서 감사합니다.
                     </p>
                     <p className="mt-4 text-base leading-relaxed text-church-brown-light sm:text-lg">
-                      우리 교회는 작은 믿음이지만 하나님의 크신 은혜 안에서 함께
-                      성장해 나가는 공동체입니다. 언제든지 방문해 주세요. 함께
-                      예배하며 은혜를 나눌 수 있기를 기대합니다.
+                      우리 교회는 대한예수교장로회(백석)에 속한 건전한 교단의
+                      교회입니다. 예수 그리스도 안에서 이 땅에 하나님 나라의
+                      확장을 위해 섬기는 교회로서, 작은 씨앗들의 모습 속에
+                      풍성한 열매를 소망하는 은혜로운 교회입니다. 언제든지
+                      방문해 주세요. 함께 예배하며 은혜를 나눌 수 있기를
+                      기대합니다.
                     </p>
                     <p className="mt-6 text-right text-base font-semibold text-church-brown">
                       담임목사 이재두 드림

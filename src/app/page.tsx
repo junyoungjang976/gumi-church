@@ -13,9 +13,8 @@ export const metadata: Metadata = {
 }
 
 const worshipServices = [
-  { name: "주일예배", time: "매주 일요일 오전 11:00", desc: "온 가족이 함께하는 주일 예배" },
-  { name: "수요예배", time: "매주 수요일 저녁 7:30", desc: "말씀으로 충전하는 시간" },
-  { name: "금요기도회", time: "매주 금요일 저녁 8:00", desc: "기도로 하나 되는 시간" },
+  { name: "주일 오전 예배", time: "매주 일요일 오전 11:00", desc: "이재두 목사 설교" },
+  { name: "주일 오후 모임", time: "매주 일요일 오후 1:00", desc: "찬양예배 · 신앙교실 · 가정주일 · 말씀나눔" },
 ]
 
 export default async function HomePage() {
@@ -44,7 +43,10 @@ export default async function HomePage() {
             구미겨자씨교회
           </h1>
           <p className="mx-auto mt-6 max-w-xl text-lg text-church-brown-light sm:text-xl">
-            겨자씨 한 알의 믿음으로
+            작은 씨앗 속에 풍성한 열매를 소망합니다
+          </p>
+          <p className="mt-2 text-sm text-church-brown-light/70">
+            대한예수교장로회(백석)
           </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Button asChild size="lg" className="min-w-[140px]">
@@ -66,7 +68,7 @@ export default async function HomePage() {
           <h3 className="mb-10 text-center text-2xl font-bold text-church-brown sm:text-3xl">
             예배 시간 안내
           </h3>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2">
             {worshipServices.map((service) => (
               <Card
                 key={service.name}

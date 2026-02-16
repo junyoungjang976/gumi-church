@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { Sun, Moon, Sunrise, Church, Info } from "lucide-react"
+import { Sun, Church, Info } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { PageHeader } from "@/components/layout/page-header"
 
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 const services = [
   {
     icon: Sun,
-    name: "주일예배",
+    name: "주일 오전 예배",
     day: "매주 일요일",
     time: "오전 11:00",
     location: "본당",
@@ -18,27 +18,11 @@ const services = [
   },
   {
     icon: Church,
-    name: "수요예배",
-    day: "매주 수요일",
-    time: "저녁 7:30",
+    name: "주일 오후 모임",
+    day: "매주 일요일",
+    time: "오후 1:00",
     location: "본당",
-    note: "이재두 목사 설교",
-  },
-  {
-    icon: Moon,
-    name: "금요기도회",
-    day: "매주 금요일",
-    time: "저녁 8:00",
-    location: "기도실",
-    note: null,
-  },
-  {
-    icon: Sunrise,
-    name: "새벽기도",
-    day: "매일",
-    time: "오전 5:30",
-    location: "기도실",
-    note: null,
+    note: "1주차 찬양예배 · 2주차 신앙교실 · 3주차 가정주일 · 4주차 말씀/간증나눔",
   },
 ]
 
