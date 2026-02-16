@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { Suspense } from "react"
 import { supabase } from "@/lib/supabase"
+import { fetchYouTubeVideos } from "@/lib/youtube-feed"
 import { PageHeader } from "@/components/layout/page-header"
 import {
   Pagination,
@@ -13,11 +14,14 @@ import {
 } from "@/components/ui/pagination"
 import { SermonSearch } from "@/components/sermons/sermon-search"
 import { SermonCard } from "@/components/sermons/sermon-card"
+import { YouTubeVideoCard } from "@/components/sermons/youtube-video-card"
 import type { Sermon } from "@/types/database"
 
 export const metadata: Metadata = {
   title: "설교",
 }
+
+export const revalidate = 3600 // ISR: Revalidate every 1 hour
 
 interface SermonsPageProps {
   searchParams: Promise<{ search?: string; page?: string }>
@@ -29,6 +33,18 @@ export default async function SermonsPage({ searchParams }: SermonsPageProps) {
   const pageSize = 9
   const offset = (currentPage - 1) * pageSize
 
+  // Fetch YouTube channel ID from church settings
+  const { data: settings } = await supabase
+    .from("church_settings")
+    .select("youtube_channel_id")
+    .single()
+
+  const channelId = settings?.youtube_channel_id
+
+  // Fetch YouTube videos if channel ID exists
+  const youtubeVideos = channelId ? await fetchYouTubeVideos(channelId, 12) : []
+
+  // Fetch Supabase sermons
   let query = supabase
     .from("church_sermons")
     .select("*", { count: "exact" })
@@ -62,20 +78,49 @@ export default async function SermonsPage({ searchParams }: SermonsPageProps) {
 
       <section className="py-16 sm:py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          {/* Search */}
-          <div className="mx-auto mb-10 max-w-md">
-            <Suspense>
-              <SermonSearch defaultValue={search} />
-            </Suspense>
-          </div>
+          {/* YouTube Videos Section */}
+          {youtubeVideos.length > 0 && (
+            <div className="mb-16">
+              <div className="mb-6 flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-church-brown">
+                  최근 설교 영상
+                </h2>
+                {channelId && (
+                  <Link
+                    href={`https://www.youtube.com/channel/${channelId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-church-brown-light hover:text-church-gold-dark transition-colors"
+                  >
+                    유튜브 채널 →
+                  </Link>
+                )}
+              </div>
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {youtubeVideos.map((video) => (
+                  <YouTubeVideoCard key={video.id} video={video} />
+                ))}
+              </div>
+            </div>
+          )}
 
-          {/* Sermon Grid */}
-          {typedSermons.length === 0 ? (
-            <p className="text-center text-church-brown-light">
-              등록된 설교가 없습니다
-            </p>
-          ) : (
-            <>
+          {/* Supabase Sermons Section */}
+          {typedSermons.length > 0 && (
+            <div>
+              {youtubeVideos.length > 0 && (
+                <h2 className="mb-6 text-2xl font-bold text-church-brown">
+                  추가 설교
+                </h2>
+              )}
+
+              {/* Search */}
+              <div className="mx-auto mb-10 max-w-md">
+                <Suspense>
+                  <SermonSearch defaultValue={search} />
+                </Suspense>
+              </div>
+
+              {/* Sermon Grid */}
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {typedSermons.map((sermon) => (
                   <SermonCard key={sermon.id} sermon={sermon} />
@@ -119,7 +164,14 @@ export default async function SermonsPage({ searchParams }: SermonsPageProps) {
                   </Pagination>
                 </div>
               )}
-            </>
+            </div>
+          )}
+
+          {/* No Content Message */}
+          {youtubeVideos.length === 0 && typedSermons.length === 0 && (
+            <p className="text-center text-church-brown-light">
+              등록된 설교가 없습니다
+            </p>
           )}
         </div>
       </section>

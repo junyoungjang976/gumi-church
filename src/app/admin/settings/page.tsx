@@ -19,12 +19,14 @@ interface SettingsForm {
   phone: string
   email: string
   address: string
+  youtube_channel_id: string
 }
 
 const defaultSettings: SettingsForm = {
   phone: "",
   email: "",
   address: "",
+  youtube_channel_id: "",
 }
 
 export default function AdminSettingsPage() {
@@ -32,6 +34,7 @@ export default function AdminSettingsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [form, setForm] = useState<SettingsForm>(defaultSettings)
   const [saving, setSaving] = useState(false)
+  const [resolving, setResolving] = useState(false)
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
 
   const fetchSettings = useCallback(async () => {
@@ -52,6 +55,7 @@ export default function AdminSettingsPage() {
           phone: data.phone ?? "",
           email: data.email ?? "",
           address: data.address ?? "",
+          youtube_channel_id: data.youtube_channel_id ?? "",
         })
       }
     } catch {
@@ -64,6 +68,29 @@ export default function AdminSettingsPage() {
   useEffect(() => {
     fetchSettings()
   }, [fetchSettings])
+
+  async function handleResolveChannel() {
+    if (!form.youtube_channel_id) return
+    setResolving(true)
+    try {
+      const res = await fetch("/api/youtube/resolve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ input: form.youtube_channel_id }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setForm({ ...form, youtube_channel_id: data.channelId })
+        setMessage({ type: "success", text: "채널 ID가 확인되었습니다: " + data.channelId })
+      } else {
+        setMessage({ type: "error", text: "채널 ID를 찾을 수 없습니다. UC로 시작하는 ID를 직접 입력해주세요." })
+      }
+    } catch {
+      setMessage({ type: "error", text: "확인 중 오류가 발생했습니다" })
+    } finally {
+      setResolving(false)
+    }
+  }
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
@@ -133,7 +160,7 @@ export default function AdminSettingsPage() {
         </div>
       </div>
 
-      {/* Settings Form */}
+      {/* Settings Form - Basic Info */}
       <Card>
         <CardHeader>
           <div className="flex items-center gap-3">
@@ -207,6 +234,47 @@ export default function AdminSettingsPage() {
               </Button>
             </div>
           </form>
+        </CardContent>
+      </Card>
+
+      {/* YouTube Settings */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="flex size-10 items-center justify-center rounded-lg bg-church-cream-dark">
+              <Video className="size-5 text-church-brown" />
+            </div>
+            <div>
+              <CardTitle className="text-lg text-church-brown">YouTube 연동</CardTitle>
+              <CardDescription>YouTube 채널을 연결하면 최신 영상이 자동으로 표시됩니다</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="settings-youtube">YouTube 채널 ID 또는 핸들</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="settings-youtube"
+                  value={form.youtube_channel_id}
+                  onChange={(e) => setForm({ ...form, youtube_channel_id: e.target.value })}
+                  placeholder="예: @gumigyazassi 또는 UC..."
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleResolveChannel}
+                  disabled={resolving}
+                >
+                  {resolving ? <Loader2 className="size-4 animate-spin" /> : "확인"}
+                </Button>
+              </div>
+              <p className="text-xs text-church-brown-light">
+                YouTube 채널 URL에서 @ 뒤의 핸들을 입력하거나, UC로 시작하는 채널 ID를 입력하세요
+              </p>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

@@ -71,6 +71,16 @@ export async function Footer() {
                   오시는길
                 </Link>
               </li>
+              <li>
+                <a
+                  href="https://www.youtube.com/@gumigyazassi"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white/70 transition-colors hover:text-white"
+                >
+                  YouTube
+                </a>
+              </li>
             </ul>
           </div>
         </div>

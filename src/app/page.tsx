@@ -1,12 +1,15 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import Image from "next/image"
-import { Clock } from "lucide-react"
+import { Clock, Play } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase"
 import { getYouTubeThumbnail } from "@/lib/youtube"
+import { fetchYouTubeVideos } from "@/lib/youtube-feed"
 import type { Notice, Sermon } from "@/types/database"
+
+export const revalidate = 3600
 
 export const metadata: Metadata = {
   title: "구미겨자씨교회 - 겨자씨 한 알의 믿음으로",
@@ -30,6 +33,20 @@ export default async function HomePage() {
     .select("*")
     .order("sermon_date", { ascending: false })
     .limit(3)
+
+  // Fetch YouTube channel ID from settings
+  const { data: settings } = await supabase
+    .from("church_settings")
+    .select("key, value")
+    .eq("key", "youtube_channel_id")
+    .single()
+
+  const youtubeChannelId = settings?.value || null
+
+  // Fetch YouTube videos if channel ID is set
+  const youtubeVideos = youtubeChannelId
+    ? await fetchYouTubeVideos(youtubeChannelId, 3)
+    : []
 
   return (
     <>
@@ -152,7 +169,42 @@ export default async function HomePage() {
               더보기 &rarr;
             </Link>
           </div>
-          {sermons && sermons.length > 0 ? (
+          {youtubeVideos.length > 0 ? (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {youtubeVideos.map((video) => (
+                <a
+                  key={video.id}
+                  href={`https://www.youtube.com/watch?v=${video.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group"
+                >
+                  <Card className="overflow-hidden border-church-gold-light transition-shadow group-hover:shadow-md">
+                    <div className="relative aspect-video w-full bg-church-cream-dark">
+                      <img
+                        src={video.thumbnail}
+                        alt={video.title}
+                        className="h-full w-full object-cover"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity group-hover:opacity-100">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-church-gold">
+                          <Play className="h-6 w-6 text-white fill-white" />
+                        </div>
+                      </div>
+                    </div>
+                    <CardContent className="pt-4">
+                      <h4 className="line-clamp-2 text-base font-semibold text-church-brown">
+                        {video.title}
+                      </h4>
+                      <div className="mt-2 text-sm text-church-brown-light">
+                        <span>{new Date(video.publishedAt).toLocaleDateString("ko-KR")}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </a>
+              ))}
+            </div>
+          ) : sermons && sermons.length > 0 ? (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {(sermons as Sermon[]).map((sermon) => {
                 const thumbnail = getYouTubeThumbnail(sermon.youtube_url)
