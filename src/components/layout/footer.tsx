@@ -1,6 +1,21 @@
 import Link from "next/link"
+import { supabase } from "@/lib/supabase"
 
-export function Footer() {
+export async function Footer() {
+  // Fetch church settings
+  const { data: settings } = await supabase
+    .from("church_settings")
+    .select("key, value")
+
+  const settingsMap: Record<string, string> = {}
+  for (const s of settings || []) {
+    settingsMap[s.key] = s.value
+  }
+
+  const phone = settingsMap.phone || "준비중"
+  const email = settingsMap.email || "준비중"
+  const address = settingsMap.address || "경북 구미시 봉곡북로15길 3"
+
   return (
     <footer className="bg-church-brown text-white">
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
@@ -15,9 +30,9 @@ export function Footer() {
           <div>
             <h4 className="font-semibold">연락처</h4>
             <ul className="mt-2 space-y-1 text-sm text-white/70">
-              <li>주소: 경북 구미시 봉곡북로15길 3</li>
-              <li>전화: 준비중</li>
-              <li>이메일: 준비중</li>
+              <li>주소: {address}</li>
+              <li>전화: {phone}</li>
+              <li>이메일: {email}</li>
             </ul>
           </div>
 

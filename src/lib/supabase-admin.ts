@@ -12,6 +12,7 @@ const mockQueryBuilder = () => ({
   select: mockQueryBuilder,
   insert: mockQueryBuilder,
   update: mockQueryBuilder,
+  upsert: mockQueryBuilder,
   delete: mockQueryBuilder,
   order: mockQueryBuilder,
   eq: mockQueryBuilder,

@@ -12,6 +12,7 @@ import {
   Pin,
   FileText,
   Video,
+  Settings,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -191,6 +192,12 @@ export default function AdminNoticesPage() {
             <Button variant="outline" size="sm">
               <Video className="size-4" />
               설교 관리
+            </Button>
+          </Link>
+          <Link href="/admin/settings">
+            <Button variant="outline" size="sm">
+              <Settings className="size-4" />
+              설정
             </Button>
           </Link>
           <Button

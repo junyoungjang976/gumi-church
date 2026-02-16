@@ -3,23 +3,11 @@ import { MapPin, Phone, Car, Bus } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { PageHeader } from "@/components/layout/page-header"
 import { KakaoMap } from "@/components/location/kakao-map"
+import { supabase } from "@/lib/supabase"
 
 export const metadata: Metadata = {
   title: "오시는 길",
 }
-
-const contactInfo = [
-  {
-    icon: MapPin,
-    label: "주소",
-    value: "경북 구미시 봉곡북로15길 3",
-  },
-  {
-    icon: Phone,
-    label: "전화",
-    value: "준비중",
-  },
-]
 
 const transportInfo = [
   {
@@ -34,7 +22,30 @@ const transportInfo = [
   },
 ]
 
-export default function LocationPage() {
+export default async function LocationPage() {
+  // Fetch church settings
+  const { data: settings } = await supabase
+    .from("church_settings")
+    .select("key, value")
+
+  const settingsMap: Record<string, string> = {}
+  for (const s of settings || []) {
+    settingsMap[s.key] = s.value
+  }
+
+  const contactInfo = [
+    {
+      icon: MapPin,
+      label: "주소",
+      value: settingsMap.address || "경북 구미시 봉곡북로15길 3",
+    },
+    {
+      icon: Phone,
+      label: "전화",
+      value: settingsMap.phone || "준비중",
+    },
+  ]
+
   return (
     <>
       <PageHeader

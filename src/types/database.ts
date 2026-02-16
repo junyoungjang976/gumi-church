@@ -38,3 +38,9 @@ export type SermonInput = Pick<Sermon, 'title' | 'preacher' | 'youtube_url' | 's
 
 export type NewcomerInquiryInput = Pick<NewcomerInquiry, 'name'> &
   Partial<Pick<NewcomerInquiry, 'phone' | 'email' | 'message'>>
+
+export interface ChurchSetting {
+  key: string
+  value: string
+  updated_at: string
+}

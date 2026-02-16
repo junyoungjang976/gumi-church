@@ -11,6 +11,7 @@ import {
   ArrowLeft,
   Video,
   FileText,
+  Settings,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -203,6 +204,12 @@ export default function AdminSermonsPage() {
             <Button variant="outline" size="sm">
               <FileText className="size-4" />
               공지 관리
+            </Button>
+          </Link>
+          <Link href="/admin/settings">
+            <Button variant="outline" size="sm">
+              <Settings className="size-4" />
+              설정
             </Button>
           </Link>
           <Button

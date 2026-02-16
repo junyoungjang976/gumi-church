@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { LogOut, FileText, Video, Loader2, Lock } from "lucide-react"
+import { LogOut, FileText, Video, Settings, Loader2, Lock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -145,7 +145,7 @@ export default function AdminPage() {
         </Button>
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <Link href="/admin/notices" className="block">
           <Card className="transition-shadow hover:shadow-md">
             <CardHeader>
@@ -182,6 +182,25 @@ export default function AdminPage() {
             <CardContent>
               <p className="text-3xl font-bold text-church-brown">{counts.sermons}</p>
               <p className="text-sm text-church-brown-light">등록된 설교</p>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/admin/settings" className="block">
+          <Card className="transition-shadow hover:shadow-md">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-lg bg-church-cream-dark">
+                  <Settings className="size-5 text-church-brown" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg text-church-brown">교회 정보 설정</CardTitle>
+                  <CardDescription>전화번호, 이메일 등 교회 정보를 수정합니다</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-church-brown-light">연락처, 주소 등 기본 정보 관리</p>
             </CardContent>
           </Card>
         </Link>
