@@ -33,13 +33,14 @@ export default async function SermonsPage({ searchParams }: SermonsPageProps) {
   const pageSize = 9
   const offset = (currentPage - 1) * pageSize
 
-  // Fetch YouTube channel ID from church settings
-  const { data: settings } = await supabase
+  // Fetch YouTube channel ID from church settings (key-value table)
+  const { data: channelSetting } = await supabase
     .from("church_settings")
-    .select("youtube_channel_id")
+    .select("value")
+    .eq("key", "youtube_channel_id")
     .single()
 
-  const channelId = settings?.youtube_channel_id
+  const channelId = channelSetting?.value || null
 
   // Fetch YouTube videos if channel ID exists
   const youtubeVideos = channelId ? await fetchYouTubeVideos(channelId, 12) : []

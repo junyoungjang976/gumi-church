@@ -15,8 +15,10 @@ const mockQueryBuilder = () => ({
   delete: mockQueryBuilder,
   order: mockQueryBuilder,
   eq: mockQueryBuilder,
+  or: mockQueryBuilder,
   single: mockQueryBuilder,
   limit: mockQueryBuilder,
+  range: mockQueryBuilder,
   then: (resolve: any) => resolve({ data: null, error: null }),
 })
 
