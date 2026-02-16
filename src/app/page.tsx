@@ -1,65 +1,208 @@
-import Image from "next/image";
+import type { Metadata } from "next"
+import Link from "next/link"
+import Image from "next/image"
+import { Clock } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { supabase } from "@/lib/supabase"
+import { getYouTubeThumbnail } from "@/lib/youtube"
+import type { Notice, Sermon } from "@/types/database"
 
-export default function Home() {
+export const metadata: Metadata = {
+  title: "구미겨자씨교회 - 겨자씨 한 알의 믿음으로",
+}
+
+const worshipServices = [
+  { name: "주일예배", time: "매주 일요일 오전 11:00", desc: "온 가족이 함께하는 주일 예배" },
+  { name: "수요예배", time: "매주 수요일 저녁 7:30", desc: "말씀으로 충전하는 시간" },
+  { name: "금요기도회", time: "매주 금요일 저녁 8:00", desc: "기도로 하나 되는 시간" },
+]
+
+export default async function HomePage() {
+  const { data: notices } = await supabase
+    .from("church_notices")
+    .select("*")
+    .order("is_pinned", { ascending: false })
+    .order("created_at", { ascending: false })
+    .limit(3)
+
+  const { data: sermons } = await supabase
+    .from("church_sermons")
+    .select("*")
+    .order("sermon_date", { ascending: false })
+    .limit(3)
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <>
+      {/* Hero Section */}
+      <section className="bg-church-cream-dark">
+        <div className="mx-auto max-w-6xl px-4 py-20 text-center sm:py-28 lg:py-32">
+          <p className="mb-4 text-sm font-medium tracking-widest text-church-gold uppercase">
+            환영합니다
           </p>
+          <h1 className="text-4xl font-bold tracking-tight text-church-brown sm:text-5xl lg:text-6xl">
+            구미겨자씨교회
+          </h1>
+          <p className="mx-auto mt-6 max-w-xl text-lg text-church-brown-light sm:text-xl">
+            겨자씨 한 알의 믿음으로
+          </p>
+          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <Button asChild size="lg" className="min-w-[140px]">
+              <Link href="/worship">예배안내</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="min-w-[140px]">
+              <Link href="/about">교회소개</Link>
+            </Button>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* Worship Times */}
+      <section className="py-16 sm:py-20">
+        <div className="mx-auto max-w-6xl px-4">
+          <h2 className="mb-2 text-center text-sm font-medium tracking-widest text-church-gold uppercase">
+            Worship
+          </h2>
+          <h3 className="mb-10 text-center text-2xl font-bold text-church-brown sm:text-3xl">
+            예배 시간 안내
+          </h3>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {worshipServices.map((service) => (
+              <Card
+                key={service.name}
+                className="border-church-gold-light bg-white text-center transition-shadow hover:shadow-md"
+              >
+                <CardContent className="pt-6">
+                  <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-church-cream-dark">
+                    <Clock className="h-5 w-5 text-church-gold" />
+                  </div>
+                  <h4 className="text-lg font-semibold text-church-brown">
+                    {service.name}
+                  </h4>
+                  <p className="mt-2 text-base font-medium text-church-brown-light">
+                    {service.time}
+                  </p>
+                  <p className="mt-1 text-sm text-church-brown-light/70">
+                    {service.desc}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
-      </main>
-    </div>
-  );
+      </section>
+
+      {/* Latest Notices */}
+      <section className="bg-church-cream-dark/50 py-16 sm:py-20">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="mb-8 flex items-center justify-between">
+            <h3 className="text-2xl font-bold text-church-brown">교회소식</h3>
+            <Link
+              href="/notices"
+              className="text-sm font-medium text-church-gold hover:text-church-brown transition-colors"
+            >
+              더보기 &rarr;
+            </Link>
+          </div>
+          {notices && notices.length > 0 ? (
+            <div className="space-y-3">
+              {(notices as Notice[]).map((notice) => (
+                <Link
+                  key={notice.id}
+                  href={`/notices/${notice.id}`}
+                  className="flex items-center justify-between rounded-lg bg-white px-5 py-4 border border-church-gold-light/50 transition-colors hover:bg-church-cream-dark/30"
+                >
+                  <div className="flex items-center gap-3">
+                    {notice.is_pinned && (
+                      <span className="rounded bg-church-gold/20 px-2 py-0.5 text-xs font-medium text-church-brown">
+                        공지
+                      </span>
+                    )}
+                    <span className="text-sm font-medium text-church-brown sm:text-base">
+                      {notice.title}
+                    </span>
+                  </div>
+                  <span className="ml-4 shrink-0 text-xs text-church-brown-light">
+                    {new Date(notice.created_at).toLocaleDateString("ko-KR")}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-lg bg-white px-5 py-8 text-center border border-church-gold-light/50">
+              <p className="text-sm text-church-brown-light">
+                등록된 소식이 없습니다.
+              </p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Latest Sermons */}
+      <section className="py-16 sm:py-20">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="mb-8 flex items-center justify-between">
+            <h3 className="text-2xl font-bold text-church-brown">최근 설교</h3>
+            <Link
+              href="/sermons"
+              className="text-sm font-medium text-church-gold hover:text-church-brown transition-colors"
+            >
+              더보기 &rarr;
+            </Link>
+          </div>
+          {sermons && sermons.length > 0 ? (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {(sermons as Sermon[]).map((sermon) => {
+                const thumbnail = getYouTubeThumbnail(sermon.youtube_url)
+                return (
+                  <Link
+                    key={sermon.id}
+                    href={`/sermons/${sermon.id}`}
+                    className="group"
+                  >
+                    <Card className="overflow-hidden border-church-gold-light transition-shadow group-hover:shadow-md">
+                      <div className="relative aspect-video w-full bg-church-cream-dark">
+                        {thumbnail ? (
+                          <Image
+                            src={thumbnail}
+                            alt={sermon.title}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          />
+                        ) : (
+                          <div className="flex h-full items-center justify-center">
+                            <span className="text-sm text-church-brown-light">
+                              썸네일 없음
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <CardContent className="pt-4">
+                        <h4 className="line-clamp-2 text-base font-semibold text-church-brown">
+                          {sermon.title}
+                        </h4>
+                        <div className="mt-2 flex items-center justify-between text-sm text-church-brown-light">
+                          <span>{sermon.preacher}</span>
+                          <span>
+                            {new Date(sermon.sermon_date).toLocaleDateString("ko-KR")}
+                          </span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                )
+              })}
+            </div>
+          ) : (
+            <div className="rounded-lg bg-white px-5 py-8 text-center border border-church-gold-light/50">
+              <p className="text-sm text-church-brown-light">
+                등록된 설교가 없습니다.
+              </p>
+            </div>
+          )}
+        </div>
+      </section>
+    </>
+  )
 }
