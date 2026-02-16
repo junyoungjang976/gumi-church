@@ -15,9 +15,9 @@ export function Footer() {
           <div>
             <h4 className="font-semibold">연락처</h4>
             <ul className="mt-2 space-y-1 text-sm text-white/70">
-              <li>주소: 경상북도 구미시 (추후 업데이트)</li>
-              <li>전화: 054-XXX-XXXX</li>
-              <li>이메일: church@example.com</li>
+              <li>주소: 경북 구미시 봉곡북로15길 3</li>
+              <li>전화: 준비중</li>
+              <li>이메일: 준비중</li>
             </ul>
           </div>
 

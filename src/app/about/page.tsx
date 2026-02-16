@@ -26,11 +26,9 @@ const visionItems = [
 ]
 
 const historyItems = [
-  { year: "2020년", event: "구미겨자씨교회 설립" },
-  { year: "2021년", event: "첫 성전 입당 예배" },
-  { year: "2022년", event: "교회학교 개설" },
-  { year: "2023년", event: "지역사회 봉사활동 시작" },
-  { year: "2024년", event: "청년부 창립" },
+  { year: "설립", event: "구미겨자씨교회 설립 예배" },
+  { year: "성장", event: "교회학교 및 소그룹 사역 시작" },
+  { year: "현재", event: "경북 구미시 봉곡북로15길 3에서 예배" },
 ]
 
 export default function AboutPage() {
@@ -106,7 +104,7 @@ export default function AboutPage() {
                       예배하며 은혜를 나눌 수 있기를 기대합니다.
                     </p>
                     <p className="mt-6 text-right text-base font-semibold text-church-brown">
-                      담임목사 드림
+                      담임목사 이재두 드림
                     </p>
                   </div>
                 </div>

@@ -13,7 +13,7 @@ export function KakaoMap() {
             지도를 불러올 수 없습니다.
           </p>
           <a
-            href="https://map.kakao.com/link/map/구미겨자씨교회,36.1190,128.3446"
+            href="https://map.kakao.com/link/map/구미겨자씨교회,36.1558,128.3092"
             target="_blank"
             rel="noopener noreferrer"
             className="mt-2 inline-block text-sm text-church-gold underline hover:text-church-brown"
@@ -27,7 +27,7 @@ export function KakaoMap() {
 
   return (
     <iframe
-      src="https://map.kakao.com/link/map/구미겨자씨교회,36.1190,128.3446"
+      src="https://map.kakao.com/link/map/구미겨자씨교회,36.1558,128.3092"
       width="100%"
       height="400"
       className="rounded-xl border border-church-gold-light"

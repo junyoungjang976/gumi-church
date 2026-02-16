@@ -14,7 +14,7 @@ const services = [
     day: "매주 일요일",
     time: "오전 11:00",
     location: "본당",
-    note: "담임목사 설교",
+    note: "이재두 목사 설교",
   },
   {
     icon: Church,
@@ -22,7 +22,7 @@ const services = [
     day: "매주 수요일",
     time: "저녁 7:30",
     location: "본당",
-    note: "담임목사 설교",
+    note: "이재두 목사 설교",
   },
   {
     icon: Moon,

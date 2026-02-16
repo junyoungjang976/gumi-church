@@ -12,12 +12,12 @@ const contactInfo = [
   {
     icon: MapPin,
     label: "주소",
-    value: "경상북도 구미시 (상세주소)",
+    value: "경북 구미시 봉곡북로15길 3",
   },
   {
     icon: Phone,
     label: "전화",
-    value: "054-XXX-XXXX",
+    value: "준비중",
   },
 ]
 
