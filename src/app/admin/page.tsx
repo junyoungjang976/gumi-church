@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { LogOut, FileText, Video, Settings, Loader2, Lock } from "lucide-react"
+import { LogOut, FileText, Video, Settings, Loader2, Lock, Film } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -14,7 +14,7 @@ export default function AdminPage() {
   const [password, setPassword] = useState("")
   const [loginError, setLoginError] = useState("")
   const [loginLoading, setLoginLoading] = useState(false)
-  const [counts, setCounts] = useState({ notices: 0, sermons: 0 })
+  const [counts, setCounts] = useState({ notices: 0, sermons: 0, reviews: 0, pendingReviews: 0 })
 
   useEffect(() => {
     checkAuth()
@@ -31,6 +31,12 @@ export default function AdminPage() {
         if (sermonsRes.ok) {
           const sermonsData = await sermonsRes.json()
           setCounts((prev) => ({ ...prev, sermons: sermonsData.length ?? 0 }))
+        }
+        const reviewsRes = await fetch("/api/admin/reviews")
+        if (reviewsRes.ok) {
+          const reviewsData = await reviewsRes.json()
+          const pending = reviewsData.filter((r: { status: string }) => r.status === "pending").length
+          setCounts((prev) => ({ ...prev, reviews: reviewsData.length ?? 0, pendingReviews: pending }))
         }
       }
     } catch {
@@ -70,7 +76,7 @@ export default function AdminPage() {
   async function handleLogout() {
     await fetch("/api/admin/auth", { method: "DELETE" })
     setIsAuthed(false)
-    setCounts({ notices: 0, sermons: 0 })
+    setCounts({ notices: 0, sermons: 0, reviews: 0, pendingReviews: 0 })
   }
 
   if (isLoading) {
@@ -145,7 +151,31 @@ export default function AdminPage() {
         </Button>
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <Link href="/admin/reviews" className="block">
+          <Card className="transition-shadow hover:shadow-md border-church-gold">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-lg bg-church-gold/20">
+                  <Film className="size-5 text-church-brown" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg text-church-brown">영상 검토</CardTitle>
+                  <CardDescription>쇼츠 영상 검토 요청 관리</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold text-church-brown">{counts.reviews}</p>
+              <p className="text-sm text-church-brown-light">
+                {counts.pendingReviews > 0
+                  ? `검토 대기 ${counts.pendingReviews}건`
+                  : "등록된 영상"}
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+
         <Link href="/admin/notices" className="block">
           <Card className="transition-shadow hover:shadow-md">
             <CardHeader>

@@ -44,3 +44,21 @@ export interface ChurchSetting {
   value: string
   updated_at: string
 }
+
+export type ReviewStatus = 'pending' | 'approved' | 'revision' | 'rejected'
+
+export interface VideoReview {
+  id: string
+  title: string
+  description: string | null
+  youtube_url: string
+  review_token: string
+  status: ReviewStatus
+  reviewer_comment: string | null
+  created_at: string
+  updated_at: string
+  reviewed_at: string | null
+}
+
+export type VideoReviewInput = Pick<VideoReview, 'title' | 'youtube_url'> &
+  Partial<Pick<VideoReview, 'description'>>
