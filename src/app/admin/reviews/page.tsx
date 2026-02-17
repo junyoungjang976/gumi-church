@@ -23,6 +23,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import type { VideoReview, ReviewStatus } from "@/types/database"
+import { extractYouTubeId } from "@/lib/youtube"
 
 const statusConfig: Record<ReviewStatus, { label: string; color: string; icon: typeof Clock }> = {
   pending: { label: "검토 대기", color: "bg-yellow-100 text-yellow-800", icon: Clock },
@@ -39,6 +40,7 @@ export default function AdminReviewsPage() {
   const [saving, setSaving] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [form, setForm] = useState({ title: "", youtube_url: "", description: "" })
+  const [previewId, setPreviewId] = useState<string | null>(null)
 
   useEffect(() => {
     fetchReviews()
@@ -235,11 +237,49 @@ export default function AdminReviewsPage() {
           {reviews.map((review) => {
             const status = statusConfig[review.status]
             const StatusIcon = status.icon
+            const videoId = extractYouTubeId(review.youtube_url)
+            const isPreview = previewId === review.id
 
             return (
-              <Card key={review.id} className="transition-shadow hover:shadow-md">
-                <CardContent className="pt-6">
-                  <div className="flex items-start justify-between gap-4">
+              <Card key={review.id} className="transition-shadow hover:shadow-md overflow-hidden">
+                <CardContent className="p-0">
+                  {/* Thumbnail / Player */}
+                  {videoId && (
+                    <div className="relative">
+                      {isPreview ? (
+                        <div className="aspect-video w-full bg-black">
+                          <iframe
+                            src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
+                            className="size-full"
+                            allow="autoplay; encrypted-media"
+                            allowFullScreen
+                          />
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          className="group relative block aspect-video w-full cursor-pointer overflow-hidden bg-gray-100"
+                          onClick={() => setPreviewId(review.id)}
+                        >
+                          <img
+                            src={`https://img.youtube.com/vi/${videoId}/mqdefault.jpg`}
+                            alt={review.title}
+                            className="size-full object-cover transition-transform group-hover:scale-105"
+                          />
+                          {/* Play button overlay */}
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/20 transition-colors group-hover:bg-black/30">
+                            <div className="flex size-14 items-center justify-center rounded-full bg-red-600 shadow-lg transition-transform group-hover:scale-110">
+                              <svg viewBox="0 0 24 24" className="ml-1 size-7 fill-white">
+                                <path d="M8 5v14l11-7z" />
+                              </svg>
+                            </div>
+                          </div>
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="flex items-start justify-between gap-4 p-4">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="text-base font-semibold text-church-brown truncate">
