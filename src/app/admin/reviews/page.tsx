@@ -191,6 +191,9 @@ export default function AdminReviewsPage() {
                   placeholder="https://youtube.com/shorts/... 또는 https://youtu.be/..."
                   required
                 />
+                <p className="text-xs text-amber-600">
+                  * YouTube에서 &quot;일부 공개&quot;로 업로드해야 검토 페이지에서 영상이 보입니다. 비공개 영상은 재생되지 않습니다.
+                </p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="description">설명 (선택)</Label>
