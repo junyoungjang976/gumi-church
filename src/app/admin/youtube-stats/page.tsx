@@ -134,9 +134,12 @@ export default function YouTubeStatsPage() {
   const topByViews = [...videosWithStats].sort(
     (a, b) => (b.stats?.viewCount ?? 0) - (a.stats?.viewCount ?? 0)
   )
-  const recentVideos = [...videosWithStats].sort(
-    (a, b) => new Date(b.stats?.publishedAt ?? 0).getTime() - new Date(a.stats?.publishedAt ?? 0).getTime()
-  )
+  const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000
+  const recentVideos = [...videosWithStats]
+    .filter((v) => new Date(v.stats?.publishedAt ?? 0).getTime() >= thirtyDaysAgo)
+    .sort(
+      (a, b) => new Date(b.stats?.publishedAt ?? 0).getTime() - new Date(a.stats?.publishedAt ?? 0).getTime()
+    )
 
   return (
     <div className="space-y-6">
@@ -216,7 +219,7 @@ export default function YouTubeStatsPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {topByViews.slice(0, 5).map((v, i) => (
+              {topByViews.slice(0, 10).map((v, i) => (
                 <div
                   key={v.review.id}
                   className="flex items-center gap-3 rounded-lg border p-3"
@@ -275,11 +278,11 @@ export default function YouTubeStatsPage() {
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-lg text-church-brown">
                 <Clock className="size-5 text-blue-500" />
-                최근 영상
+                최근 30일 영상
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {recentVideos.slice(0, 5).map((v) => (
+              {recentVideos.slice(0, 10).map((v) => (
                 <div
                   key={v.review.id}
                   className="flex items-center gap-3 rounded-lg border p-3"
