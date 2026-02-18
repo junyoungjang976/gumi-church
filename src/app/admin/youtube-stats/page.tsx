@@ -18,87 +18,49 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import type { VideoReview } from "@/types/database"
-import { extractYouTubeId } from "@/lib/youtube"
 
-interface YouTubeStats {
+interface ChannelVideo {
   videoId: string
   title: string
   publishedAt: string
+  thumbnail: string
   viewCount: number
   likeCount: number
   commentCount: number
 }
 
-interface VideoWithStats {
-  review: VideoReview
-  stats: YouTubeStats | null
-  videoId: string | null
-}
-
 export default function YouTubeStatsPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
-  const [statsLoading, setStatsLoading] = useState(false)
-  const [videos, setVideos] = useState<VideoWithStats[]>([])
+  const [refreshing, setRefreshing] = useState(false)
+  const [videos, setVideos] = useState<ChannelVideo[]>([])
 
   useEffect(() => {
-    fetchAll()
+    fetchChannel()
   }, [])
 
-  async function fetchAll() {
+  async function fetchChannel() {
     try {
-      const reviewsRes = await fetch("/api/admin/reviews")
-      if (reviewsRes.status === 401) {
+      const res = await fetch("/api/admin/youtube-channel")
+      if (res.status === 401) {
         router.push("/admin")
         return
       }
-      if (!reviewsRes.ok) return
-
-      const reviews: VideoReview[] = await reviewsRes.json()
-      const videosWithId = reviews.map((r) => ({
-        review: r,
-        stats: null as YouTubeStats | null,
-        videoId: extractYouTubeId(r.youtube_url),
-      }))
-
-      setVideos(videosWithId)
-      await fetchStats(videosWithId)
+      if (res.ok) {
+        const data: ChannelVideo[] = await res.json()
+        setVideos(data)
+      }
     } catch {
       // error
     } finally {
       setLoading(false)
+      setRefreshing(false)
     }
   }
 
-  async function fetchStats(videoList: VideoWithStats[]) {
-    const ids = videoList
-      .map((v) => v.videoId)
-      .filter((id): id is string => id !== null)
-
-    if (ids.length === 0) return
-
-    setStatsLoading(true)
-    try {
-      const res = await fetch(`/api/admin/youtube-stats?ids=${ids.join(",")}`)
-      if (res.ok) {
-        const stats: YouTubeStats[] = await res.json()
-        const statsMap: Record<string, YouTubeStats> = {}
-        for (const s of stats) {
-          statsMap[s.videoId] = s
-        }
-        setVideos((prev) =>
-          prev.map((v) => ({
-            ...v,
-            stats: v.videoId ? statsMap[v.videoId] ?? null : null,
-          }))
-        )
-      }
-    } catch {
-      // silent
-    } finally {
-      setStatsLoading(false)
-    }
+  function handleRefresh() {
+    setRefreshing(true)
+    fetchChannel()
   }
 
   function formatNumber(n: number): string {
@@ -125,21 +87,17 @@ export default function YouTubeStatsPage() {
     )
   }
 
-  const videosWithStats = videos.filter((v) => v.stats !== null)
-  const totalViews = videosWithStats.reduce((sum, v) => sum + (v.stats?.viewCount ?? 0), 0)
-  const totalLikes = videosWithStats.reduce((sum, v) => sum + (v.stats?.likeCount ?? 0), 0)
-  const totalComments = videosWithStats.reduce((sum, v) => sum + (v.stats?.commentCount ?? 0), 0)
-  const avgViews = videosWithStats.length > 0 ? Math.round(totalViews / videosWithStats.length) : 0
+  const totalViews = videos.reduce((sum, v) => sum + v.viewCount, 0)
+  const totalLikes = videos.reduce((sum, v) => sum + v.likeCount, 0)
+  const totalComments = videos.reduce((sum, v) => sum + v.commentCount, 0)
+  const avgViews = videos.length > 0 ? Math.round(totalViews / videos.length) : 0
 
-  const topByViews = [...videosWithStats].sort(
-    (a, b) => (b.stats?.viewCount ?? 0) - (a.stats?.viewCount ?? 0)
-  )
+  const topByViews = [...videos].sort((a, b) => b.viewCount - a.viewCount)
+
   const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000
-  const recentVideos = [...videosWithStats]
-    .filter((v) => new Date(v.stats?.publishedAt ?? 0).getTime() >= thirtyDaysAgo)
-    .sort(
-      (a, b) => new Date(b.stats?.publishedAt ?? 0).getTime() - new Date(a.stats?.publishedAt ?? 0).getTime()
-    )
+  const recentVideos = videos.filter(
+    (v) => new Date(v.publishedAt).getTime() >= thirtyDaysAgo
+  )
 
   return (
     <div className="space-y-6">
@@ -150,19 +108,19 @@ export default function YouTubeStatsPage() {
             <ArrowLeft className="size-4" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-church-brown">쇼츠 성과 대시보드</h1>
+            <h1 className="text-2xl font-bold text-church-brown">YouTube 성과 대시보드</h1>
             <p className="text-sm text-church-brown-light">
-              YouTube 쇼츠 영상 성과를 한눈에 확인하세요
+              @gumigyazassi 채널 전체 영상 ({videos.length}개)
             </p>
           </div>
         </div>
         <Button
           variant="outline"
           size="sm"
-          onClick={() => fetchStats(videos)}
-          disabled={statsLoading}
+          onClick={handleRefresh}
+          disabled={refreshing}
         >
-          <RefreshCw className={`size-4 ${statsLoading ? "animate-spin" : ""}`} />
+          <RefreshCw className={`size-4 ${refreshing ? "animate-spin" : ""}`} />
           새로고침
         </Button>
       </div>
@@ -199,12 +157,12 @@ export default function YouTubeStatsPage() {
         </Card>
       </div>
 
-      {videosWithStats.length === 0 ? (
+      {videos.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
             <BarChart3 className="mx-auto mb-3 size-10 text-church-brown-light/30" />
             <p className="text-sm text-church-brown-light">
-              성과 데이터가 없습니다. 영상 검토에서 쇼츠를 등록해주세요.
+              채널에 영상이 없습니다.
             </p>
           </CardContent>
         </Card>
@@ -221,7 +179,7 @@ export default function YouTubeStatsPage() {
             <CardContent className="space-y-3">
               {topByViews.slice(0, 10).map((v, i) => (
                 <div
-                  key={v.review.id}
+                  key={v.videoId}
                   className="flex items-center gap-3 rounded-lg border p-3"
                 >
                   <span className={`flex size-7 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
@@ -232,34 +190,32 @@ export default function YouTubeStatsPage() {
                   }`}>
                     {i + 1}
                   </span>
-                  {v.videoId && (
-                    <img
-                      src={`https://img.youtube.com/vi/${v.videoId}/default.jpg`}
-                      alt=""
-                      className="size-12 shrink-0 rounded object-cover"
-                    />
-                  )}
+                  <img
+                    src={v.thumbnail || `https://img.youtube.com/vi/${v.videoId}/default.jpg`}
+                    alt=""
+                    className="size-12 shrink-0 rounded object-cover"
+                  />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium text-church-brown">
-                      {v.review.title}
+                      {v.title}
                     </p>
-                    <div className="mt-1 flex items-center gap-3 text-xs text-church-brown-light">
+                    <div className="mt-1 flex items-center gap-3 text-xs">
                       <span className="flex items-center gap-1 text-blue-600">
                         <Eye className="size-3" />
-                        {formatNumber(v.stats?.viewCount ?? 0)}
+                        {formatNumber(v.viewCount)}
                       </span>
                       <span className="flex items-center gap-1 text-rose-500">
                         <ThumbsUp className="size-3" />
-                        {formatNumber(v.stats?.likeCount ?? 0)}
+                        {formatNumber(v.likeCount)}
                       </span>
                       <span className="flex items-center gap-1 text-emerald-500">
                         <MessageCircle className="size-3" />
-                        {formatNumber(v.stats?.commentCount ?? 0)}
+                        {formatNumber(v.commentCount)}
                       </span>
                     </div>
                   </div>
                   <a
-                    href={v.review.youtube_url}
+                    href={`https://www.youtube.com/watch?v=${v.videoId}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="shrink-0"
@@ -279,57 +235,66 @@ export default function YouTubeStatsPage() {
               <CardTitle className="flex items-center gap-2 text-lg text-church-brown">
                 <Clock className="size-5 text-blue-500" />
                 최근 30일 영상
+                {recentVideos.length > 0 && (
+                  <Badge variant="outline" className="text-[10px]">
+                    {recentVideos.length}개
+                  </Badge>
+                )}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {recentVideos.slice(0, 10).map((v) => (
-                <div
-                  key={v.review.id}
-                  className="flex items-center gap-3 rounded-lg border p-3"
-                >
-                  {v.videoId && (
+              {recentVideos.length === 0 ? (
+                <p className="py-4 text-center text-sm text-church-brown-light">
+                  최근 30일 내 업로드된 영상이 없습니다.
+                </p>
+              ) : (
+                recentVideos.slice(0, 10).map((v) => (
+                  <div
+                    key={v.videoId}
+                    className="flex items-center gap-3 rounded-lg border p-3"
+                  >
                     <img
-                      src={`https://img.youtube.com/vi/${v.videoId}/default.jpg`}
+                      src={v.thumbnail || `https://img.youtube.com/vi/${v.videoId}/default.jpg`}
                       alt=""
                       className="size-12 shrink-0 rounded object-cover"
                     />
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="truncate text-sm font-medium text-church-brown">
-                        {v.review.title}
-                      </p>
-                      <Badge variant="outline" className="shrink-0 text-[10px]">
-                        {v.stats?.publishedAt ? timeAgo(v.stats.publishedAt) : ""}
-                      </Badge>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="truncate text-sm font-medium text-church-brown">
+                          {v.title}
+                        </p>
+                        <Badge variant="outline" className="shrink-0 text-[10px]">
+                          {timeAgo(v.publishedAt)}
+                        </Badge>
+                      </div>
+                      <div className="mt-1 flex items-center gap-3 text-xs">
+                        <span className="flex items-center gap-1 text-blue-600">
+                          <Eye className="size-3" />
+                          {formatNumber(v.viewCount)}
+                        </span>
+                        <span className="flex items-center gap-1 text-rose-500">
+                          <ThumbsUp className="size-3" />
+                          {formatNumber(v.likeCount)}
+                        </span>
+                        <span className="flex items-center gap-1 text-emerald-500">
+                          <MessageCircle className="size-3" />
+                          {formatNumber(v.commentCount)}
+                        </span>
+                      </div>
                     </div>
-                    <div className="mt-1 flex items-center gap-3 text-xs text-church-brown-light">
-                      <span className="flex items-center gap-1 text-blue-600">
-                        <Eye className="size-3" />
-                        {formatNumber(v.stats?.viewCount ?? 0)}
-                      </span>
-                      <span className="flex items-center gap-1 text-rose-500">
-                        <ThumbsUp className="size-3" />
-                        {formatNumber(v.stats?.likeCount ?? 0)}
-                      </span>
-                      <span className="flex items-center gap-1 text-emerald-500">
-                        <MessageCircle className="size-3" />
-                        {formatNumber(v.stats?.commentCount ?? 0)}
-                      </span>
-                    </div>
+                    <a
+                      href={`https://www.youtube.com/watch?v=${v.videoId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="shrink-0"
+                    >
+                      <Button variant="ghost" size="icon-xs">
+                        <ExternalLink className="size-3" />
+                      </Button>
+                    </a>
                   </div>
-                  <a
-                    href={v.review.youtube_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="shrink-0"
-                  >
-                    <Button variant="ghost" size="icon-xs">
-                      <ExternalLink className="size-3" />
-                    </Button>
-                  </a>
-                </div>
-              ))}
+                ))
+              )}
             </CardContent>
           </Card>
 
@@ -338,7 +303,7 @@ export default function YouTubeStatsPage() {
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-lg text-church-brown">
                 <BarChart3 className="size-5" />
-                전체 영상 성과
+                전체 영상 성과 ({videos.length}개)
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -355,37 +320,35 @@ export default function YouTubeStatsPage() {
                   </thead>
                   <tbody>
                     {topByViews.map((v) => (
-                      <tr key={v.review.id} className="border-b last:border-0">
+                      <tr key={v.videoId} className="border-b last:border-0">
                         <td className="py-3 pr-4">
                           <div className="flex items-center gap-2">
-                            {v.videoId && (
-                              <img
-                                src={`https://img.youtube.com/vi/${v.videoId}/default.jpg`}
-                                alt=""
-                                className="size-8 shrink-0 rounded object-cover"
-                              />
-                            )}
+                            <img
+                              src={v.thumbnail || `https://img.youtube.com/vi/${v.videoId}/default.jpg`}
+                              alt=""
+                              className="size-8 shrink-0 rounded object-cover"
+                            />
                             <a
-                              href={v.review.youtube_url}
+                              href={`https://www.youtube.com/watch?v=${v.videoId}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="truncate max-w-[200px] text-church-brown hover:underline"
                             >
-                              {v.review.title}
+                              {v.title}
                             </a>
                           </div>
                         </td>
                         <td className="px-3 py-3 text-right font-medium text-blue-600">
-                          {formatNumber(v.stats?.viewCount ?? 0)}
+                          {formatNumber(v.viewCount)}
                         </td>
                         <td className="px-3 py-3 text-right text-rose-500">
-                          {formatNumber(v.stats?.likeCount ?? 0)}
+                          {formatNumber(v.likeCount)}
                         </td>
                         <td className="px-3 py-3 text-right text-emerald-500">
-                          {formatNumber(v.stats?.commentCount ?? 0)}
+                          {formatNumber(v.commentCount)}
                         </td>
                         <td className="py-3 pl-3 text-right text-church-brown-light">
-                          {v.stats?.publishedAt ? timeAgo(v.stats.publishedAt) : "-"}
+                          {timeAgo(v.publishedAt)}
                         </td>
                       </tr>
                     ))}
