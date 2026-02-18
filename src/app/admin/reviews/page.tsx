@@ -15,6 +15,11 @@ import {
   XCircle,
   Clock,
   MessageSquare,
+  Eye,
+  ThumbsUp,
+  MessageCircle,
+  BarChart3,
+  RefreshCw,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -24,6 +29,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import type { VideoReview, ReviewStatus } from "@/types/database"
 import { extractYouTubeId } from "@/lib/youtube"
+
+interface YouTubeStats {
+  videoId: string
+  viewCount: number
+  likeCount: number
+  commentCount: number
+}
 
 const statusConfig: Record<ReviewStatus, { label: string; color: string; icon: typeof Clock }> = {
   pending: { label: "검토 대기", color: "bg-yellow-100 text-yellow-800", icon: Clock },
@@ -41,10 +53,37 @@ export default function AdminReviewsPage() {
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [form, setForm] = useState({ title: "", youtube_url: "", description: "" })
   const [previewId, setPreviewId] = useState<string | null>(null)
+  const [statsMap, setStatsMap] = useState<Record<string, YouTubeStats>>({})
+  const [statsLoading, setStatsLoading] = useState(false)
 
   useEffect(() => {
     fetchReviews()
   }, [])
+
+  async function fetchStats(reviewList: VideoReview[]) {
+    const ids = reviewList
+      .map((r) => extractYouTubeId(r.youtube_url))
+      .filter((id): id is string => id !== null)
+
+    if (ids.length === 0) return
+
+    setStatsLoading(true)
+    try {
+      const res = await fetch(`/api/admin/youtube-stats?ids=${ids.join(",")}`)
+      if (res.ok) {
+        const stats: YouTubeStats[] = await res.json()
+        const map: Record<string, YouTubeStats> = {}
+        for (const s of stats) {
+          map[s.videoId] = s
+        }
+        setStatsMap(map)
+      }
+    } catch {
+      // stats fetch failed silently
+    } finally {
+      setStatsLoading(false)
+    }
+  }
 
   async function fetchReviews() {
     try {
@@ -56,6 +95,7 @@ export default function AdminReviewsPage() {
       if (res.ok) {
         const data = await res.json()
         setReviews(data)
+        fetchStats(data)
       }
     } catch {
       // error
@@ -163,6 +203,54 @@ export default function AdminReviewsPage() {
           <p className="text-xs text-orange-600">부분 수정</p>
         </div>
       </div>
+
+      {/* YouTube Performance Summary */}
+      {Object.keys(statsMap).length > 0 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-lg text-church-brown">
+                <BarChart3 className="size-5" />
+                YouTube 쇼츠 성과
+              </CardTitle>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fetchStats(reviews)}
+                disabled={statsLoading}
+              >
+                <RefreshCw className={`size-3 ${statsLoading ? "animate-spin" : ""}`} />
+                새로고침
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="rounded-lg bg-blue-50 p-4 text-center">
+                <Eye className="mx-auto mb-1 size-5 text-blue-600" />
+                <p className="text-2xl font-bold text-blue-700">
+                  {Object.values(statsMap).reduce((sum, s) => sum + s.viewCount, 0).toLocaleString()}
+                </p>
+                <p className="text-xs text-blue-600">총 조회수</p>
+              </div>
+              <div className="rounded-lg bg-rose-50 p-4 text-center">
+                <ThumbsUp className="mx-auto mb-1 size-5 text-rose-600" />
+                <p className="text-2xl font-bold text-rose-700">
+                  {Object.values(statsMap).reduce((sum, s) => sum + s.likeCount, 0).toLocaleString()}
+                </p>
+                <p className="text-xs text-rose-600">총 좋아요</p>
+              </div>
+              <div className="rounded-lg bg-emerald-50 p-4 text-center">
+                <MessageCircle className="mx-auto mb-1 size-5 text-emerald-600" />
+                <p className="text-2xl font-bold text-emerald-700">
+                  {Object.values(statsMap).reduce((sum, s) => sum + s.commentCount, 0).toLocaleString()}
+                </p>
+                <p className="text-xs text-emerald-600">총 댓글</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Create Form */}
       {showForm && (
@@ -306,6 +394,24 @@ export default function AdminReviewsPage() {
                           <p className="text-xs text-church-brown whitespace-pre-wrap">
                             {review.reviewer_comment}
                           </p>
+                        </div>
+                      )}
+
+                      {/* YouTube Stats */}
+                      {videoId && statsMap[videoId] && (
+                        <div className="mt-2 flex items-center gap-4 text-xs">
+                          <span className="flex items-center gap-1 text-blue-600">
+                            <Eye className="size-3" />
+                            {statsMap[videoId].viewCount.toLocaleString()}
+                          </span>
+                          <span className="flex items-center gap-1 text-rose-600">
+                            <ThumbsUp className="size-3" />
+                            {statsMap[videoId].likeCount.toLocaleString()}
+                          </span>
+                          <span className="flex items-center gap-1 text-emerald-600">
+                            <MessageCircle className="size-3" />
+                            {statsMap[videoId].commentCount.toLocaleString()}
+                          </span>
                         </div>
                       )}
 
