@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { LogOut, FileText, Video, Settings, Loader2, Lock, Film } from "lucide-react"
+import { LogOut, FileText, Video, Settings, Loader2, Lock, Film, BarChart3 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -212,6 +212,25 @@ export default function AdminPage() {
             <CardContent>
               <p className="text-3xl font-bold text-church-brown">{counts.sermons}</p>
               <p className="text-sm text-church-brown-light">등록된 설교</p>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/admin/youtube-stats" className="block">
+          <Card className="transition-shadow hover:shadow-md border-church-sage">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-lg bg-blue-50">
+                  <BarChart3 className="size-5 text-blue-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg text-church-brown">쇼츠 성과</CardTitle>
+                  <CardDescription>YouTube 쇼츠 조회수, 좋아요, 댓글 추적</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-church-brown-light">실시간 YouTube 성과 대시보드</p>
             </CardContent>
           </Card>
         </Link>
