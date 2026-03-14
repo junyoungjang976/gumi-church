@@ -23,7 +23,10 @@ export async function Footer() {
           <div>
             <h3 className="text-lg font-bold">구미겨자씨교회</h3>
             <p className="mt-2 text-sm text-white/70">
-              믿음으로 함께 성장하는 교회
+              성령의 생기로 살아 움직이는 교회
+            </p>
+            <p className="mt-1 text-xs text-white/50">
+              대한예수교장로회(백석)
             </p>
           </div>
 

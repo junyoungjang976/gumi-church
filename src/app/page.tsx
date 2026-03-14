@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import Image from "next/image"
-import { Clock, Play } from "lucide-react"
+import { Clock, Play, Flame, Heart, Hourglass } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase"
@@ -17,7 +17,22 @@ export const metadata: Metadata = {
 
 const worshipServices = [
   { name: "주일 오전 예배", time: "매주 일요일 오전 11:00", desc: "이재두 목사 설교" },
-  { name: "주일 오후 모임", time: "매주 일요일 오후 1:00", desc: "찬양예배 · 신앙교실 · 가정주일 · 말씀나눔" },
+  { name: "주일 오후 모임", time: "매주 일요일 오후 1:00", desc: "1주 찬양예배 · 2주 신앙교실 · 3주 가정주일 · 4주 말씀나눔" },
+]
+
+const coreValues = [
+  {
+    title: "성령으로 행하는 교회",
+    desc: "사람의 방법이 아닌, 성령의 인도하심을 따라 걸어갑니다. 날마다 물어보고, 순종하고, 기다립니다.",
+  },
+  {
+    title: "정직한 고백이 있는 교회",
+    desc: "완벽한 사람들의 모임이 아닙니다. 솔직한 한 사람의 고백이 공동체 전체를 깨우는 것을 경험합니다.",
+  },
+  {
+    title: "기다림을 아는 교회",
+    desc: "10년, 19년을 기다려도 포기하지 않습니다. 하나님의 때를 신뢰하며 씨를 뿌리는 교회입니다.",
+  },
 ]
 
 export default async function HomePage() {
@@ -54,23 +69,25 @@ export default async function HomePage() {
       <section className="bg-church-cream-dark">
         <div className="mx-auto max-w-6xl px-4 py-20 text-center sm:py-28 lg:py-32">
           <p className="mb-4 text-sm font-medium tracking-widest text-church-gold uppercase">
-            환영합니다
+            대한예수교장로회(백석)
           </p>
           <h1 className="text-4xl font-bold tracking-tight text-church-brown sm:text-5xl lg:text-6xl">
             구미겨자씨교회
           </h1>
           <p className="mx-auto mt-6 max-w-xl text-lg text-church-brown-light sm:text-xl">
-            작은 씨앗 속에 풍성한 열매를 소망합니다
+            작은 겨자씨 한 알이 자라 큰 나무가 되듯,<br className="hidden sm:block" />
+            성령의 생기로 살아 움직이는 교회입니다
           </p>
-          <p className="mt-2 text-sm text-church-brown-light/70">
-            대한예수교장로회(백석)
+          <p className="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-church-brown-light/70">
+            &ldquo;내가 새 일을 행하리라 이것이 이제 나타낼 것이라&rdquo;
+            <span className="ml-1 text-xs">(이사야 43:19)</span>
           </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Button asChild size="lg" className="min-w-[140px]">
               <Link href="/worship">예배안내</Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="min-w-[140px]">
-              <Link href="/about">교회소개</Link>
+              <Link href="/newcomer">처음 오시는 분</Link>
             </Button>
           </div>
         </div>
@@ -111,8 +128,57 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Latest Notices */}
+      {/* Core Values */}
       <section className="bg-church-cream-dark/50 py-16 sm:py-20">
+        <div className="mx-auto max-w-6xl px-4">
+          <h2 className="mb-2 text-center text-sm font-medium tracking-widest text-church-gold uppercase">
+            Identity
+          </h2>
+          <h3 className="mb-10 text-center text-2xl font-bold text-church-brown sm:text-3xl">
+            우리가 믿는 것
+          </h3>
+          <div className="grid gap-6 sm:grid-cols-3">
+            {coreValues.map((value, i) => {
+              const icons = [Flame, Heart, Hourglass]
+              const Icon = icons[i]
+              return (
+                <Card
+                  key={value.title}
+                  className="border-church-gold-light bg-white text-center transition-shadow hover:shadow-md"
+                >
+                  <CardContent className="pt-6">
+                    <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-church-cream-dark">
+                      <Icon className="h-5 w-5 text-church-gold" />
+                    </div>
+                    <h4 className="text-lg font-semibold text-church-brown">
+                      {value.title}
+                    </h4>
+                    <p className="mt-2 text-sm leading-relaxed text-church-brown-light">
+                      {value.desc}
+                    </p>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Pastor Quote */}
+      <section className="py-16 sm:py-20">
+        <div className="mx-auto max-w-3xl px-4 text-center">
+          <blockquote className="text-lg leading-relaxed text-church-brown sm:text-xl">
+            &ldquo;외적인 것이 갖춰져도 생기가 없으면 부흥은 없습니다.
+            성령의 생기가 임할 때, 마른 뼈도 다시 살아납니다.&rdquo;
+          </blockquote>
+          <p className="mt-4 text-sm font-medium text-church-brown-light">
+            &mdash; 이재두 목사
+          </p>
+        </div>
+      </section>
+
+      {/* Latest Notices */}
+      <section className="bg-church-cream-dark/30 py-16 sm:py-20">
         <div className="mx-auto max-w-6xl px-4">
           <div className="mb-8 flex items-center justify-between">
             <h3 className="text-2xl font-bold text-church-brown">교회소식</h3>

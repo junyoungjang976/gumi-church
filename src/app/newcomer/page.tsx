@@ -48,11 +48,16 @@ export default function NewcomerPage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-2xl font-bold text-church-brown sm:text-3xl">
-              처음 오시는 분들을 진심으로 환영합니다
+              있는 모습 그대로 오세요
             </h2>
             <p className="mt-4 text-base leading-relaxed text-church-brown-light sm:text-lg">
-              구미겨자씨교회는 누구나 편안하게 하나님의 사랑을 경험할 수 있는
-              곳입니다. 처음 방문하시는 분들도 따뜻하게 맞이하겠습니다.
+              교회는 완벽한 사람들이 모이는 곳이 아닙니다.
+              깨어지고, 지치고, 질문이 많은 사람들이 와서
+              함께 씻김 받는 곳입니다. 어떤 상태로 오시든 괜찮습니다.
+            </p>
+            <p className="mt-3 text-base leading-relaxed text-church-brown-light sm:text-lg">
+              구미겨자씨교회는 오신 분들을 따뜻하게 맞이합니다.
+              부담 없이 방문하셔서 함께 예배해 보세요.
             </p>
           </div>
         </div>
